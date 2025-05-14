@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fancy Tic Tac Toe</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", sans-serif;
+      text-align: center;
+      background: linear-gradient(135deg, #3cdee4, #f565cc);
+      min-height: 100vh;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    h1 {
+      font-size: 3em;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 8px #00000050;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .cell {
+      width: 100px;
+      height: 100px;
+      background-color: #fff;
+      color: #333;
+      font-size: 2.5em;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 12px;
+      transition: 0.3s ease;
+      box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+    }
+
+    .cell:hover {
+      background-color: #e1e1ff;
+      transform: scale(1.05);
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 25px;
+      font-size: 16px;
+      border: none;
+      background-color: #fff;
+      color: #333;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #ddd;
+    }
+
+    #status {
+      font-size: 20px;
+      margin-top: 20px;
+      font-weight: bold;
+      text-shadow: 1px 1px 3px #00000040;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Tic Tac Toe</h1>
+  <div id="gameBoard" class="board"></div>
+  <p id="status"></p>
+  <button onclick="resetGame()">Restart Game</button>
+
+  <!-- Sound Effects -->
+  <audio id="clickSound" src="touch.mp3.wav"></audio>
+  <audio id="winSound" src="winning.mp3.wav"></audio>
+
+  <script>
+    let board = ["", "", "", "", "", "", "", "", ""];
+    let currentPlayer = "X";
+    let gameActive = true;
+
+    const gameBoard = document.getElementById("gameBoard");
+    const statusDisplay = document.getElementById("status");
+    const clickSound = document.getElementById("clickSound");
+    const winSound = document.getElementById("winSound");
+
+    const winningConditions = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6],
+    ];
+
+    function initializeBoard() {
+      gameBoard.innerHTML = "";
+      board.forEach((_, index) => {
+        const cell = document.createElement("div");
+        cell.classList.add("cell");
+        cell.setAttribute("data-index", index);
+        cell.addEventListener("click", handleCellClick);
+        gameBoard.appendChild(cell);
+      });
+      statusDisplay.textContent = `Player ${currentPlayer}'s turn`;
+    }
+
+    function handleCellClick(e) {
+      const index = e.target.getAttribute("data-index");
+
+      if (board[index] !== "" || !gameActive) return;
+
+      board[index] = currentPlayer;
+      e.target.textContent = currentPlayer;
+      clickSound.play();
+
+      if (checkWin()) {
+        statusDisplay.textContent = `🎉 Player ${currentPlayer} wins! 🎉`;
+        winSound.play();
+        gameActive = false;
+        highlightWinningCells();
+        return;
+      }
+
+      if (!board.includes("")) {
+        statusDisplay.textContent = "🤝 It's a draw!";
+        gameActive = false;
+        return;
+      }
+
+      currentPlayer = currentPlayer === "X" ? "O" : "X";
+      statusDisplay.textContent = `Player ${currentPlayer}'s turn`;
+    }
+
+    function checkWin() {
+      return winningConditions.some((condition) => {
+        if (
+          board[condition[0]] === currentPlayer &&
+          board[condition[1]] === currentPlayer &&
+          board[condition[2]] === currentPlayer
+        ) {
+          winningCombo = condition;
+          return true;
+        }
+        return false;
+      });
+    }
+
+    function highlightWinningCells() {
+      winningConditions.forEach(condition => {
+        if (
+          board[condition[0]] === currentPlayer &&
+          board[condition[1]] === currentPlayer &&
+          board[condition[2]] === currentPlayer
+        ) {
+          condition.forEach(index => {
+            document.querySelector(`[data-index="${index}"]`).style.backgroundColor = "#a2ffa2";
+          });
+        }
+      });
+    }
+
+    function resetGame() {
+      board = ["", "", "", "", "", "", "", "", ""];
+      currentPlayer = "X";
+      gameActive = true;
+      initializeBoard();
+    }
+
+    initializeBoard();
+  </script>
+</body>
+</html>
